@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     sendgrid_api_key: Optional[str] = os.getenv("SENDGRID_API_KEY")
     sendgrid_from_email: str = os.getenv("SENDGRID_FROM_EMAIL", "noreply@ragevaluator.com")
     
+    # AI Configuration
+    gemini_api_key: Optional[str] = os.getenv("GEMINI_API_KEY")
+    
     # CORS Configuration
     cors_origins: list = ["*"]  # In production, specify exact origins
     cors_credentials: bool = True

@@ -8,6 +8,16 @@ from backend.app.database.connection import db_manager
 from backend.app.utils.helpers import setup_logging
 import logging
 
+# Load environment variables
+try:
+    from dotenv import load_dotenv
+    load_dotenv()  # This will load .env from the current working directory
+    logger = logging.getLogger(__name__)
+    logger.info("Environment variables loaded from .env file")
+except ImportError:
+    logger = logging.getLogger(__name__)
+    logger.warning("python-dotenv not available, using system environment variables")
+
 # Setup logging
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -18,19 +28,22 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("🚀 Starting RAG Evaluator API...")
     
-    # Connect to database
+    # Connect to database (optional - some features may work without it)
     try:
         db_manager.connect()
         logger.info("✅ Database connected successfully")
     except Exception as e:
-        logger.error(f"❌ Failed to connect to database: {e}")
-        raise e
+        logger.warning(f"⚠️ Database connection failed: {e}")
+        logger.info("📝 Continuing without database - some features may be limited")
     
     yield
     
     # Shutdown
     logger.info("🛑 Shutting down RAG Evaluator API...")
-    db_manager.disconnect()
+    try:
+        db_manager.disconnect()
+    except Exception as e:
+        logger.warning(f"Database disconnect error (expected if DB wasn't connected): {e}")
 
 # Create FastAPI application
 app = FastAPI(
