@@ -40,6 +40,7 @@ export default function Home() {
     alert("You have been logged out.");
     navigate("/");
   };
+  const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:8000";
 
   // --- Handle RAG Evaluation ---
   const handleEvaluation = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -91,7 +92,7 @@ export default function Home() {
 
       // Call RAG evaluation API
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:8000/api/v1/rag/evaluate", {
+      const response = await fetch(`${apiBase}/api/v1/rag/evaluate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
