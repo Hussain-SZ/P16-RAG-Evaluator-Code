@@ -8,7 +8,14 @@ export default function AccountSettings() {
   const [currentPassword, setCurrentPassword] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
+  
+  // Delete account form fields
+  const [deleteEmail, setDeleteEmail] = useState<string>("");
+  const [deletePassword, setDeletePassword] = useState<string>("");
+  const [deleteConfirmation, setDeleteConfirmation] = useState<string>("");
+  
   const [message, setMessage] = useState<string>("");
+  const [deleteMessage, setDeleteMessage] = useState<string>("");
   const navigate = useNavigate();
 
   // --- Logout ---
@@ -21,40 +28,60 @@ export default function AccountSettings() {
   // --- Delete Account ---
   const handleDeleteAccount = () => {
     setShowDeleteModal(true);
+    setDeleteMessage("");
+    setDeleteEmail("");
+    setDeletePassword("");
+    setDeleteConfirmation("");
   };
 
   const confirmDelete = async () => {
+    // Validate required fields
+    if (!deleteEmail || !deletePassword || !deleteConfirmation) {
+      setDeleteMessage("All fields are required.");
+      return;
+    }
+
+    if (deleteConfirmation !== "delete my account") {
+      setDeleteMessage("Please type exactly 'delete my account' to confirm.");
+      return;
+    }
+
     try {
       const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:8000";
-      const token = localStorage.getItem("token");
       const response = await fetch(`${apiBase}/auth/delete-account`, {
-        method: "DELETE",
+        method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json"
-        }
+        },
+        body: JSON.stringify({
+          email: deleteEmail,
+          password: deletePassword,
+          confirmation: deleteConfirmation
+        })
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        alert("Account deleted successfully.");
+        alert("Account deleted successfully. We're sorry to see you go!");
         localStorage.removeItem("token");
         setShowDeleteModal(false);
         navigate("/");
       } else {
-        alert(data.detail || "Failed to delete account.");
-        setShowDeleteModal(false);
+        setDeleteMessage(data.detail || "Failed to delete account.");
       }
     } catch (err) {
       console.error(err);
-      alert("Server error while deleting account.");
-      setShowDeleteModal(false);
+      setDeleteMessage("Server error while deleting account.");
     }
   };
 
   const cancelDelete = () => {
     setShowDeleteModal(false);
+    setDeleteMessage("");
+    setDeleteEmail("");
+    setDeletePassword("");
+    setDeleteConfirmation("");
   };
 
   // --- Reset Password ---
@@ -71,10 +98,47 @@ export default function AccountSettings() {
       return;
     }
 
+    if (!currentPassword) {
+      setMessage("Current password is required!");
+      return;
+    }
+
     try {
-      // This would need a new endpoint to change password while logged in
-      // For now, we'll show a message to use the forgot password flow
-      setMessage("Please use the 'Forgot Password' link on the login page to reset your password.");
+      const apiBase = import.meta.env.VITE_API_BASE || "http://localhost:8000";
+      
+      // Get email from token or localStorage if available
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setMessage("You must be logged in to change password.");
+        return;
+      }
+
+      // Decode JWT to get user email (simple decode, not verification)
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userEmail = payload.email;
+
+      const response = await fetch(`${apiBase}/auth/change-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: userEmail,
+          current_password: currentPassword,
+          new_password: newPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage("Password changed successfully!");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        setMessage(data.detail || "Failed to change password.");
+      }
     } catch (err) {
       console.error(err);
       setMessage("Server error. Please try again later.");
@@ -96,10 +160,50 @@ export default function AccountSettings() {
         <div className="modal-overlay">
           <div className="modal-box">
             <h2>Delete Account</h2>
-            <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+            <p>Please confirm your account deletion by providing the following information:</p>
+            
+            <div className="delete-form">
+              <div className="form-group">
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  value={deleteEmail}
+                  onChange={(e) => setDeleteEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Password</label>
+                <input
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Type "delete my account" to confirm</label>
+                <input
+                  type="text"
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  placeholder="delete my account"
+                  required
+                />
+              </div>
+
+              {deleteMessage && (
+                <p className="error-message">{deleteMessage}</p>
+              )}
+            </div>
+            
             <div className="modal-buttons">
               <button onClick={confirmDelete} className="confirm-delete-btn">
-                Delete
+                Delete Account
               </button>
               <button onClick={cancelDelete} className="cancel-btn">
                 Cancel
