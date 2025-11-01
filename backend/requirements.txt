@@ -1,0 +1,32 @@
+# === FastAPI and ASGI Server ===
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+
+# === Database ===
+pymongo==4.10.1
+requests==2.32.3
+dnspython==2.7.0          # needed by pymongo for MongoDB Atlas SRV connections
+
+# === Authentication and Security ===
+python-jose[cryptography]==3.3.0
+bcrypt==4.2.1
+python-multipart==0.0.20
+passlib[bcrypt]==1.7.4   # recommended for password hashing support and compatibility
+
+# === Environment Variables ===
+python-dotenv==1.0.1
+
+# === Data Validation ===
+pydantic==2.10.3
+pydantic-settings==2.6.1
+
+# === Email Support ===
+secure-smtplib==0.1.1
+email-validator==2.2.0   # for validating user email input in Pydantic models
+
+# === Utilities ===
+typing-extensions==4.12.2
+python-dateutil==2.9.0    # for datetime parsing if you use ISO date fields
+
+# === Dev Tools (optional but helpful) ===
+watchfiles==0.24.0        # for uvicorn --reload (already implied, but explicit)
