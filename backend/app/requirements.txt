@@ -27,6 +27,8 @@ email-validator==2.2.0   # for validating user email input in Pydantic models
 typing-extensions==4.12.2
 requests==2.32.3          # common utility for external API calls (optional, but widely used)
 dnspython==2.7.0          # needed by pymongo for MongoDB Atlas SRV connections
+# === google genai ===
+google-generativeai==0.8.3
 
 # === Dev Tools (optional but helpful) ===
 watchfiles==0.24.0        # for uvicorn --reload (already implied, but explicit)
