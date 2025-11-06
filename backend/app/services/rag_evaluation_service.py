@@ -34,13 +34,12 @@ class RAGEvaluationService:
         try:
             api_key = os.getenv("GEMINI_API_KEY")
             if not api_key:
-                logger.warning("GEMINI_API_KEY environment variable not set - service will run in mock mode")
+                logger.warning("GEMINI_API_KEY environment variable not set.")
                 return
             genai.configure(api_key=api_key)
             logger.info("Gemini API configured successfully")
         except Exception as e:
             logger.error(f"Failed to configure Gemini API: {e}")
-            logger.warning("Service will run in mock mode")
     
     def split_into_sentences(self, text: str) -> List[str]:
         """Splits text into sentences using simple regex."""
@@ -144,8 +143,7 @@ class RAGEvaluationService:
             
             # 3. Check if Gemini is available
             if not GENAI_AVAILABLE:
-                # Return a mock response for testing
-                return self._create_mock_response(sentences)
+                return logger.warning("GEMINI_API_KEY environment variable not set.")
             
             # 4. Set up the Gemini model
             model_name = os.getenv("GEMINI_MODEL_NAME")
@@ -225,66 +223,6 @@ class RAGEvaluationService:
                 "status": "error",
                 "error": f"An error occurred during evaluation: {str(e)}"
             }
-
-    def _create_mock_response(self, sentences: List[str]) -> Dict[str, Any]:
-        """Create a mock response for testing when Gemini API is not available"""
-        logger.info("Creating mock response for RAG evaluation (API not available)")
-        
-        # Create mock evaluations for each sentence
-        evaluations_list = []
-        for i, sentence in enumerate(sentences):
-            # Simple mock classification based on sentence length
-            if len(sentence) > 50:
-                classification = "faithful"
-            elif len(sentence) > 30:
-                classification = "inferred"
-            elif len(sentence) > 20:
-                classification = "extrapolated"
-            else:
-                classification = "hallucinated"
-            
-            evaluation = {
-                "sentence_number": i + 1,
-                "sentence_text": sentence,
-                "classification": classification,
-                "justification": f"Mock evaluation: This is a {classification} sentence based on length.",
-                "supporting_chunk": "Mock supporting evidence" if classification != "hallucinated" else "N/A"
-            }
-            evaluations_list.append(evaluation)
-        
-        # Calculate mock aggregate metrics
-        total = len(evaluations_list)
-        faithful_count = sum(1 for e in evaluations_list if e["classification"] == "faithful")
-        hallucination_count = sum(1 for e in evaluations_list if e["classification"] == "hallucinated")
-        inferred_count = sum(1 for e in evaluations_list if e["classification"] == "inferred")
-        extrapolated_count = sum(1 for e in evaluations_list if e["classification"] == "extrapolated")
-        
-        # Calculate Precision and Recall
-        precision = round((faithful_count / total), 3) if total > 0 else 0
-        context_grounded_count = faithful_count + inferred_count
-        recall = round((context_grounded_count / total), 3) if total > 0 else 0
-        f1_score = round((2 * precision * recall) / (precision + recall), 3) if (precision + recall) > 0 else 0
-        
-        aggregate_metrics = {
-            "faithfulness_rate": round((faithful_count / total), 3) if total > 0 else 0,
-            "hallucination_rate": round((hallucination_count / total), 3) if total > 0 else 0,
-            "inferred_rate": round((inferred_count / total), 3) if total > 0 else 0,
-            "extrapolated_rate": round((extrapolated_count / total), 3) if total > 0 else 0,
-            "precision": precision,
-            "recall": recall,
-            "f1_score": f1_score,
-            "total_sentences": total,
-            "faithful_count": faithful_count,
-            "hallucination_count": hallucination_count,
-            "inferred_count": inferred_count,
-            "extrapolated_count": extrapolated_count
-        }
-
-        return {
-            "status": "success",
-            "aggregate_metrics": aggregate_metrics,
-            "sentence_evaluations": evaluations_list
-        }
 
 
 # Create a singleton instance
