@@ -33,6 +33,12 @@ export default function Home() {
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [evaluationResult, setEvaluationResult] = useState<RAGEvaluationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Store original inputs for saving
+  const [lastQuery, setLastQuery] = useState<string>("");
+  const [lastContext, setLastContext] = useState<string>("");
+  const [lastAnswer, setLastAnswer] = useState<string>("");
 
   // --- Logout ---
   const handleLogout = () => {
@@ -113,6 +119,11 @@ export default function Home() {
       const result: RAGEvaluationResult = await response.json();
       setEvaluationResult(result);
       
+      // Store inputs for potential saving
+      setLastQuery(query.trim());
+      setLastContext(context.trim());
+      setLastAnswer(answer.trim());
+      
       // Update success message based on context source
       if (file && file.size > 0) {
         setUploadMessage(`✅ RAG evaluation completed! Used uploaded file "${file.name}" as context.`);
@@ -129,11 +140,73 @@ export default function Home() {
     }
   };
 
+  // --- Save Report ---
+  const handleSaveReport = async () => {
+    if (!evaluationResult || evaluationResult.status !== "success") {
+      alert("No evaluation results to save!");
+      return;
+    }
+
+    const reportName = prompt("Enter a name for this report:");
+    if (!reportName || !reportName.trim()) {
+      return;
+    }
+
+    const tags = prompt("Enter tags (comma-separated, optional):");
+    const tagList = tags ? tags.split(",").map(t => t.trim()).filter(t => t) : [];
+
+    const notes = prompt("Add any notes (optional):");
+
+    setIsSaving(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please login to save reports");
+        navigate("/login");
+        return;
+      }
+
+      const response = await fetch(`${apiBase}/api/v1/reports/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          report_name: reportName.trim(),
+          query: lastQuery,
+          context: lastContext,
+          llm_output: lastAnswer,
+          aggregate_metrics: evaluationResult.aggregate_metrics,
+          sentence_evaluations: evaluationResult.sentence_evaluations,
+          tags: tagList,
+          notes: notes || "",
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to save report");
+      }
+
+      const result = await response.json();
+      alert(`✅ Report saved successfully! ID: ${result.report_id}`);
+
+    } catch (err) {
+      console.error("Error saving report:", err);
+      alert(`❌ Failed to save report: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="home-container">
       <div className="home-content">
         {/* Account Settings and Logout Buttons - Top Right */}
         <div className="account-actions">
+          <button onClick={() => navigate("/my-reports")}>My Reports</button>
           <button onClick={() => navigate("/account-settings")}>Account Settings</button>
           <button onClick={handleLogout} className="logout-button">Log Out</button>
         </div>
@@ -167,7 +240,7 @@ export default function Home() {
                 disabled={isLoading}
               />
               <small className="context-hint">
-                💡 <strong>Two ways to provide context:</strong><br/>
+                <strong>Two ways to provide context:</strong><br/>
                 1. Type directly in the textarea above, OR<br/>
                 2. Upload a .txt file below (file content will override textarea)
               </small>
@@ -206,7 +279,16 @@ export default function Home() {
           {/* --- Evaluation Results --- */}
           {evaluationResult && evaluationResult.status === "success" && (
             <div className="evaluation-results">
-              <h3>📊 Evaluation Results</h3>
+              <div className="results-header">
+                <h3>📊 Evaluation Results</h3>
+                <button 
+                  onClick={handleSaveReport} 
+                  className="save-report-button"
+                  disabled={isSaving}
+                >
+                  {isSaving ? "Saving..." : "💾 Save Report"}
+                </button>
+              </div>
               
               {/* Aggregate Metrics */}
               {evaluationResult.aggregate_metrics && (

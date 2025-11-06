@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     
     # Database Configuration
     mongo_uri: str = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-    database_name: str = "rag_evaluator"
+    database_name: str = "P16-DB"
     
     # JWT Configuration
     jwt_secret: str = os.getenv("JWT_SECRET", "your-super-secret-jwt-key-here-make-it-long-and-random")
