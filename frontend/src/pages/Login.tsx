@@ -28,7 +28,6 @@ export default function Login() {
         password: password, 
       }),
     });
-    // const resetLink = "http://localhost:8000/auth/reset-password";
     
     const data: APIResponse = await response.json();
     if (response.ok) {

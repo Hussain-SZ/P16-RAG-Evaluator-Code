@@ -13,11 +13,11 @@ class Settings(BaseSettings):
     
     # Database Configuration
     mongo_uri: str = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-    database_name: str = os.getenv("DATABASE_NAME")
+    database_name: str = os.getenv("DATABASE_NAME", "rag_evaluator")
     
     # JWT Configuration
-    jwt_secret: str = os.getenv("JWT_SECRET")
-    jwt_algorithm: str = os.getenv("JWT_ALGORITHM")
+    jwt_secret: str = os.getenv("JWT_SECRET", "your-super-secret-jwt-key-here-make-it-long-and-random")
+    jwt_algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")
     access_token_expire_minutes: int = 30
     reset_token_expire_minutes: int = 10
     

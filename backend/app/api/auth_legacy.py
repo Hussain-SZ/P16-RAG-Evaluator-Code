@@ -79,7 +79,7 @@ def request_password_reset_legacy(reset_data: PasswordResetRequest):
             detail=f"Password reset request failed: {str(e)}"
         )
 
-@router.post("/verify-otp", response_model=MessageResponse)
+@router.post("/verify-otp")
 def verify_otp_legacy(otp_data: OTPRequest):
     """Legacy endpoint: Verify OTP for password reset"""
     # This is for password reset OTP verification
@@ -101,14 +101,28 @@ def verify_otp_legacy(otp_data: OTPRequest):
                 detail="OTP has expired"
             )
         
-        if stored_otp["otp"] != otp_data.otp:
+        # Clean and normalize both OTPs for comparison (same as in main service)
+        stored_otp_clean = str(stored_otp["otp"]).strip()
+        provided_otp_clean = str(otp_data.otp).strip()
+        
+        if stored_otp_clean != provided_otp_clean:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid OTP"
             )
         
-        # Don't delete OTP yet, keep it for password reset
-        return MessageResponse(message="OTP verified successfully")
+        # Generate reset token for password reset
+        from backend.app.core.security import create_reset_token
+        reset_token = create_reset_token(otp_data.email)
+        
+        # Clear OTP from store since it's been successfully verified
+        del auth_service.otp_store[otp_data.email]
+        
+        # Return both message and reset_token (frontend expects this format)
+        return {
+            "message": "OTP verified successfully", 
+            "reset_token": reset_token
+        }
         
     except HTTPException:
         raise
@@ -120,14 +134,43 @@ def verify_otp_legacy(otp_data: OTPRequest):
 
 @router.post("/reset-password", response_model=MessageResponse)
 def reset_password_legacy(
-    email: str = Body(...),
-    otp: str = Body(...),
+    email: str = Body(None),
+    otp: str = Body(None),
+    token: str = Body(None),
     new_password: str = Body(...)
 ):
-    """Legacy endpoint: Reset password using OTP"""
+    """Legacy endpoint: Reset password using OTP or token"""
     try:
-        result = auth_service.reset_password_with_otp(email, otp, new_password)
-        return MessageResponse(message=result["message"])
+        if token:
+            # Token-based reset (from OTP verification flow)
+            from backend.app.core.security import verify_reset_token, hash_password
+            from backend.app.database.repositories import user_repository
+            
+            # Verify the reset token and get email
+            email_from_token = verify_reset_token(token)
+            
+            # Hash new password and update in database
+            new_password_hash = hash_password(new_password)
+            success = user_repository.update_password(email_from_token, new_password_hash)
+            
+            if not success:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to update password"
+                )
+            
+            return MessageResponse(message="Password reset successful")
+            
+        elif email and otp:
+            # OTP-based reset (direct OTP flow)
+            result = auth_service.reset_password_with_otp(email, otp, new_password)
+            return MessageResponse(message=result["message"])
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Either token or (email and otp) must be provided"
+            )
+            
     except HTTPException:
         raise
     except Exception as e:
@@ -252,17 +295,3 @@ def delete_account_legacy(delete_request: DeleteAccountRequest):
             detail=f"Account deletion failed: {str(e)}"
         )
 
-# TEMPORARY: Test endpoint to get OTP for development (REMOVE IN PRODUCTION!)
-@router.get("/dev-get-otp/{email}")
-def dev_get_otp(email: str):
-    """DEVELOPMENT ONLY: Get OTP for testing purposes"""
-    from backend.app.services.auth_service import auth_service
-    otp_data = auth_service.otp_store.get(email)
-    if otp_data:
-        return {
-            "email": email,
-            "otp": otp_data["otp"], 
-            "expires": str(otp_data["expires"]),
-            "purpose": otp_data["purpose"]
-        }
-    return {"message": "No OTP found for this email"}

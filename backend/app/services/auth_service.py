@@ -115,7 +115,11 @@ class AuthService:
                 detail="OTP has expired"
             )
         
-        if stored_otp["otp"] != otp:
+        # Clean and normalize both OTPs for comparison
+        stored_otp_clean = str(stored_otp["otp"]).strip()
+        provided_otp_clean = str(otp).strip()
+        
+        if stored_otp_clean != provided_otp_clean:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid OTP"
@@ -228,7 +232,11 @@ class AuthService:
                 detail="OTP has expired"
             )
         
-        if stored_otp["otp"] != otp:
+        # Clean and normalize both OTPs for comparison
+        stored_otp_clean = str(stored_otp["otp"]).strip()
+        provided_otp_clean = str(otp).strip()
+        
+        if stored_otp_clean != provided_otp_clean:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid OTP"
@@ -275,6 +283,27 @@ class AuthService:
         self.send_otp_email(email, otp, purpose)
         
         return {"message": "New OTP sent to email"}
+    
+    def debug_otp_status(self, email: str) -> Dict[str, any]:
+        """Debug method to check OTP status - REMOVE IN PRODUCTION"""
+        stored_otp = self.otp_store.get(email)
+        if not stored_otp:
+            return {"status": "no_otp_found", "email": email}
+        
+        now = datetime.utcnow()
+        is_expired = stored_otp["expires"] < now
+        time_remaining = (stored_otp["expires"] - now).total_seconds() if not is_expired else 0
+        
+        return {
+            "status": "otp_found",
+            "email": email,
+            "otp": stored_otp["otp"],
+            "purpose": stored_otp["purpose"],
+            "expires": stored_otp["expires"].isoformat(),
+            "is_expired": is_expired,
+            "time_remaining_seconds": time_remaining,
+            "pending_registration": email in self.pending_registrations
+        }
 
 # Create global service instance
 auth_service = AuthService()

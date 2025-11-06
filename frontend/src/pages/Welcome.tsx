@@ -1,11 +1,7 @@
-// import React from "react";
 import { Link } from "react-router-dom";
 import "../styling/Welcome.css";
 import BlurText from "../assets/blurtext.tsx";
 
-// const handleAnimationComplete = () => {
-//   console.log('Animation completed!');
-// };
 
 export default function Welcome() {
   return (
