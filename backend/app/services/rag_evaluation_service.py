@@ -148,8 +148,9 @@ class RAGEvaluationService:
                 return self._create_mock_response(sentences)
             
             # 4. Set up the Gemini model
+            model_name = os.getenv("GEMINI_MODEL_NAME")
             model = genai.GenerativeModel(
-                'gemini-2.0-flash-exp',  # Use Flash for speed and cost-efficiency
+                model_name, 
                 generation_config={"response_mime_type": "application/json"}  # Enforce JSON output!
             )
             

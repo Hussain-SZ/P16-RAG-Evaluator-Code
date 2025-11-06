@@ -31,6 +31,12 @@ interface RAGEvaluationResult {
 export default function Home() {
   const navigate = useNavigate();
 
+  // Constants for textarea row counts
+  const QUERY_TEXTAREA_ROWS = 2;
+  const CONTEXT_TEXTAREA_ROWS = 4;
+  const ANSWER_TEXTAREA_ROWS = 4;
+  const NOTES_TEXTAREA_ROWS = 4;
+
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
@@ -250,7 +256,7 @@ export default function Home() {
               <textarea
                 placeholder="Enter your original query here..."
                 name="query"
-                rows={2}
+                rows={QUERY_TEXTAREA_ROWS}
                 required
                 disabled={isLoading}
               />
@@ -261,7 +267,7 @@ export default function Home() {
               <textarea
                 placeholder="Enter the context or retrieved information here..."
                 name="context"
-                rows={4}
+                rows={CONTEXT_TEXTAREA_ROWS}
                 disabled={isLoading}
               />
               <small className="context-hint">
@@ -277,7 +283,7 @@ export default function Home() {
               <textarea
                 placeholder="Enter the LLM-generated answer to evaluate..."
                 name="answer"
-                rows={4}
+                rows={ANSWER_TEXTAREA_ROWS}
                 required
                 disabled={isLoading}
               />
