@@ -462,7 +462,7 @@ export default function Home() {
                 </label>
                 <textarea
                   id="report-notes"
-                  rows={4}
+                  rows={NOTES_TEXTAREA_ROWS}
                   placeholder="Add any additional notes or context..."
                   value={reportFormData.notes}
                   onChange={(e) => setReportFormData({ ...reportFormData, notes: e.target.value })}
