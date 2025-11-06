@@ -176,11 +176,26 @@ class RAGEvaluationService:
             inferred_count = sum(1 for e in evaluations_list if e.get("classification") == "inferred")
             extrapolated_count = sum(1 for e in evaluations_list if e.get("classification") == "extrapolated")
             
+            # Calculate Precision and Recall
+            # Precision: Proportion of generated sentences that are faithful (accurate)
+            precision = round((faithful_count / total), 3) if total > 0 else 0
+            
+            # Recall: Proportion of answer that is grounded in context (faithful + inferred)
+            # This measures how much of the answer is actually supported by the retrieved context
+            context_grounded_count = faithful_count + inferred_count
+            recall = round((context_grounded_count / total), 3) if total > 0 else 0
+            
+            # F1 Score: Harmonic mean of precision and recall
+            f1_score = round((2 * precision * recall) / (precision + recall), 3) if (precision + recall) > 0 else 0
+            
             aggregate_metrics = {
                 "faithfulness_rate": round((faithful_count / total), 3) if total > 0 else 0,
                 "hallucination_rate": round((hallucination_count / total), 3) if total > 0 else 0,
                 "inferred_rate": round((inferred_count / total), 3) if total > 0 else 0,
                 "extrapolated_rate": round((extrapolated_count / total), 3) if total > 0 else 0,
+                "precision": precision,
+                "recall": recall,
+                "f1_score": f1_score,
                 "total_sentences": total,
                 "faithful_count": faithful_count,
                 "hallucination_count": hallucination_count,
@@ -243,11 +258,20 @@ class RAGEvaluationService:
         inferred_count = sum(1 for e in evaluations_list if e["classification"] == "inferred")
         extrapolated_count = sum(1 for e in evaluations_list if e["classification"] == "extrapolated")
         
+        # Calculate Precision and Recall
+        precision = round((faithful_count / total), 3) if total > 0 else 0
+        context_grounded_count = faithful_count + inferred_count
+        recall = round((context_grounded_count / total), 3) if total > 0 else 0
+        f1_score = round((2 * precision * recall) / (precision + recall), 3) if (precision + recall) > 0 else 0
+        
         aggregate_metrics = {
             "faithfulness_rate": round((faithful_count / total), 3) if total > 0 else 0,
             "hallucination_rate": round((hallucination_count / total), 3) if total > 0 else 0,
             "inferred_rate": round((inferred_count / total), 3) if total > 0 else 0,
             "extrapolated_rate": round((extrapolated_count / total), 3) if total > 0 else 0,
+            "precision": precision,
+            "recall": recall,
+            "f1_score": f1_score,
             "total_sentences": total,
             "faithful_count": faithful_count,
             "hallucination_count": hallucination_count,

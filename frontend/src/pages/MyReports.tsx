@@ -289,6 +289,34 @@ export default function MyReports() {
                       </span>
                     </div>
                   </div>
+
+                  <h3 style={{ marginTop: '24px' }}>🎯 Performance Metrics</h3>
+                  <div className="metrics-grid">
+                    <div className="metric">
+                      <span className="metric-label">Precision:</span>
+                      <span className="metric-value precision" title="Proportion of sentences that are faithful (accurate)">
+                        {(selectedReport.aggregate_metrics.precision * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="metric">
+                      <span className="metric-label">Recall:</span>
+                      <span className="metric-value recall" title="Proportion of answer grounded in context">
+                        {(selectedReport.aggregate_metrics.recall * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="metric">
+                      <span className="metric-label">F1 Score:</span>
+                      <span className="metric-value f1-score" title="Harmonic mean of precision and recall">
+                        {(selectedReport.aggregate_metrics.f1_score * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="metric">
+                      <span className="metric-label">Total Sentences:</span>
+                      <span className="metric-value">
+                        {selectedReport.aggregate_metrics.total_sentences}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Sentence Evaluations */}

@@ -9,6 +9,9 @@ interface RAGEvaluationResult {
     hallucination_rate: number;
     inferred_rate: number;
     extrapolated_rate: number;
+    precision: number;
+    recall: number;
+    f1_score: number;
     total_sentences: number;
     faithful_count: number;
     hallucination_count: number;
@@ -39,6 +42,14 @@ export default function Home() {
   const [lastQuery, setLastQuery] = useState<string>("");
   const [lastContext, setLastContext] = useState<string>("");
   const [lastAnswer, setLastAnswer] = useState<string>("");
+  
+  // Modal state for save report
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [reportFormData, setReportFormData] = useState({
+    name: "",
+    tags: "",
+    notes: ""
+  });
 
   // --- Logout ---
   const handleLogout = () => {
@@ -147,17 +158,27 @@ export default function Home() {
       return;
     }
 
-    const reportName = prompt("Enter a name for this report:");
-    if (!reportName || !reportName.trim()) {
+    // Reset form data and show modal
+    setReportFormData({ name: "", tags: "", notes: "" });
+    setShowSaveModal(true);
+  };
+
+  // --- Submit Save Report Form ---
+  const handleSubmitSaveReport = async () => {
+    const reportName = reportFormData.name.trim();
+    
+    if (!reportName) {
+      alert("Report name is required!");
       return;
     }
 
-    const tags = prompt("Enter tags (comma-separated, optional):");
-    const tagList = tags ? tags.split(",").map(t => t.trim()).filter(t => t) : [];
-
-    const notes = prompt("Add any notes (optional):");
+    if (!evaluationResult) {
+      alert("No evaluation results available!");
+      return;
+    }
 
     setIsSaving(true);
+    setShowSaveModal(false);
 
     try {
       const token = localStorage.getItem("token");
@@ -167,6 +188,10 @@ export default function Home() {
         return;
       }
 
+      const tagList = reportFormData.tags 
+        ? reportFormData.tags.split(",").map(t => t.trim()).filter(t => t) 
+        : [];
+
       const response = await fetch(`${apiBase}/api/v1/reports/save`, {
         method: "POST",
         headers: {
@@ -174,14 +199,14 @@ export default function Home() {
           "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({
-          report_name: reportName.trim(),
+          report_name: reportName,
           query: lastQuery,
           context: lastContext,
           llm_output: lastAnswer,
           aggregate_metrics: evaluationResult.aggregate_metrics,
           sentence_evaluations: evaluationResult.sentence_evaluations,
           tags: tagList,
-          notes: notes || "",
+          notes: reportFormData.notes || "",
         }),
       });
 
@@ -311,6 +336,22 @@ export default function Home() {
                       <span className="metric-label">Extrapolated Rate:</span>
                       <span className="metric-value extrapolated">{(evaluationResult.aggregate_metrics.extrapolated_rate * 100).toFixed(1)}%</span>
                     </div>
+                  </div>
+                  
+                  <h4 style={{ marginTop: '24px' }}>Performance Metrics</h4>
+                  <div className="metrics-grid">
+                    <div className="metric">
+                      <span className="metric-label">Precision:</span>
+                      <span className="metric-value precision" title="Proportion of sentences that are faithful (accurate)">{(evaluationResult.aggregate_metrics.precision * 100).toFixed(1)}%</span>
+                    </div>
+                    <div className="metric">
+                      <span className="metric-label">Recall:</span>
+                      <span className="metric-value recall" title="Proportion of answer grounded in context">{(evaluationResult.aggregate_metrics.recall * 100).toFixed(1)}%</span>
+                    </div>
+                    <div className="metric">
+                      <span className="metric-label">F1 Score:</span>
+                      <span className="metric-value f1-score" title="Harmonic mean of precision and recall">{(evaluationResult.aggregate_metrics.f1_score * 100).toFixed(1)}%</span>
+                    </div>
                     <div className="metric">
                       <span className="metric-label">Total Sentences:</span>
                       <span className="metric-value">{evaluationResult.aggregate_metrics.total_sentences}</span>
@@ -360,6 +401,88 @@ export default function Home() {
           <p>©️ {new Date().getFullYear()} RAG Pipeline Evaluator</p>
         </footer>
       </div>
+
+      {/* Save Report Modal */}
+      {showSaveModal && (
+        <div className="modal-overlay" onClick={() => setShowSaveModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>💾 Save Evaluation Report</h2>
+              <button 
+                className="modal-close" 
+                onClick={() => setShowSaveModal(false)}
+                aria-label="Close modal"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form className="modal-form" onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmitSaveReport();
+            }}>
+              <div className="form-group">
+                <label htmlFor="report-name">
+                  Report Name <span className="required">*</span>
+                </label>
+                <input
+                  id="report-name"
+                  type="text"
+                  placeholder="Enter a name for this report"
+                  value={reportFormData.name}
+                  onChange={(e) => setReportFormData({ ...reportFormData, name: e.target.value })}
+                  autoFocus
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="report-tags">
+                  Tags <span className="optional">(optional)</span>
+                </label>
+                <input
+                  id="report-tags"
+                  type="text"
+                  placeholder="e.g., production, customer-support, experiment-1"
+                  value={reportFormData.tags}
+                  onChange={(e) => setReportFormData({ ...reportFormData, tags: e.target.value })}
+                />
+                <small className="form-hint">Comma-separated values</small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="report-notes">
+                  Notes <span className="optional">(optional)</span>
+                </label>
+                <textarea
+                  id="report-notes"
+                  rows={4}
+                  placeholder="Add any additional notes or context..."
+                  value={reportFormData.notes}
+                  onChange={(e) => setReportFormData({ ...reportFormData, notes: e.target.value })}
+                />
+              </div>
+
+              <div className="modal-actions">
+                <button 
+                  type="button" 
+                  className="btn-cancel" 
+                  onClick={() => setShowSaveModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn-save"
+                  disabled={!reportFormData.name.trim()}
+                >
+                  Save Report
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

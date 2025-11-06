@@ -33,6 +33,9 @@ class AggregateMetrics(BaseModel):
     hallucination_rate: float
     inferred_rate: float
     extrapolated_rate: float
+    precision: float
+    recall: float
+    f1_score: float
     total_sentences: int
     faithful_count: int
     hallucination_count: int

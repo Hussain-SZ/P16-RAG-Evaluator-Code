@@ -333,6 +333,20 @@
 .metric-value.inferred { color: #f39c12; }
 .metric-value.extrapolated { color: #9b59b6; }
 
+/* Performance Metric Colors */
+.metric-value.precision { 
+  color: #3498db; 
+  font-weight: 700;
+}
+.metric-value.recall { 
+  color: #1abc9c; 
+  font-weight: 700;
+}
+.metric-value.f1-score { 
+  color: #667eea; 
+  font-weight: 700;
+}
+
 /* Sentence Evaluations (reuse from Home) */
 .sentence-evaluations {
   display: flex;
