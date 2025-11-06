@@ -56,17 +56,17 @@ export default function Welcome() {
 
         <div className="features-grid">
           <div className="feature-card">
-            <span className="feature-icon">🎯</span>
+            <span className="feature-icon">Target</span>
             <h3>Synthetic Data</h3>
             <p>Automatically create test cases from your internal data sources to evaluate retrieval accuracy.</p>
           </div>
           <div className="feature-card">
-            <span className="feature-icon">📊</span>
+            <span className="feature-icon">Chart</span>
             <h3>Quality Metrics</h3>
             <p>Use built-in RAG metrics to measure faithfulness, relevance, and completeness of responses.</p>
           </div>
           <div className="feature-card">
-            <span className="feature-icon">🔍</span>
+            <span className="feature-icon">Search</span>
             <h3>Debug & Optimize</h3>
             <p>Pinpoint retrieval or generation failures and optimize your pipeline before impact.</p>
           </div>

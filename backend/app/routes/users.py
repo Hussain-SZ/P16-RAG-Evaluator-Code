@@ -30,11 +30,11 @@ try:
     
     # Test MongoDB connection
     client.admin.command('ping')
-    print("✅ Successfully connected to MongoDB!")
+    print("Successfully connected to MongoDB!")
     print(f"   Database: {db.name}")
     print(f"   Collections: {db.list_collection_names()}")
 except Exception as e:
-    print(f"❌ MongoDB connection failed: {e}")
+    print(f"MongoDB connection failed: {e}")
     # Create a dummy connection for development
     client = None
     db = None
@@ -57,12 +57,12 @@ def send_otp_email(email: str, otp: str, purpose: str = "password_reset") -> boo
     api_key = os.getenv("SENDGRID_API_KEY")
     from_email = os.getenv("SENDGRID_FROM_EMAIL", "noreply@ragevaluator.com")
     
-    print(f"📧 Attempting to send OTP to {email}")
+    print(f"Attempting to send OTP to {email}")
     print(f"   Using SendGrid API")
     
     if not api_key:
-        print("❌ SENDGRID_API_KEY not set in environment variables")
-        print(f"📧 OTP for {email}: {otp}")  # Print for development
+        print("SENDGRID_API_KEY not set in environment variables")
+        print(f"OTP for {email}: {otp}")  # Print for development
         return True  # Return True for development
     
     url = "https://api.sendgrid.com/v3/mail/send"
@@ -120,38 +120,38 @@ def send_otp_email(email: str, otp: str, purpose: str = "password_reset") -> boo
         response = requests.post(url, headers=headers, json=payload, timeout=10)
         
         if response.status_code == 202:
-            print(f"✅ OTP sent to {email} via SendGrid")
-            print(f"📧 OTP for {email}: {otp}")  # Still print for development/debugging
+            print(f"OTP sent to {email} via SendGrid")
+            print(f"OTP for {email}: {otp}")  # Still print for development/debugging
             return True
         else:
-            print(f"❌ SendGrid API failed ({response.status_code}): {response.text}")
-            print(f"📧 OTP for {email}: {otp}")  # Print for development
+            print(f"SendGrid API failed ({response.status_code}): {response.text}")
+            print(f"OTP for {email}: {otp}")  # Print for development
             return True  # Return True for development even if email fails
     except requests.exceptions.Timeout:
-        print(f"❌ SendGrid API request timed out")
-        print(f"📧 OTP for {email}: {otp}")  # Print for development
+        print(f"SendGrid API request timed out")
+        print(f"OTP for {email}: {otp}")  # Print for development
         return True  # Return True for development
     except Exception as e:
-        print(f"❌ Error sending OTP via SendGrid: {e}")
-        print(f"📧 OTP for {email}: {otp}")  # Print for development
+        print(f"Error sending OTP via SendGrid: {e}")
+        print(f"OTP for {email}: {otp}")  # Print for development
         return True  # Return True for development
 
 # -------- UC-001 Registration with OTP
 @router.post("/request-registration-otp")
 def request_registration_otp(user: User):
     """Send OTP to user's email for registration verification"""
-    print(f"📝 Registration OTP request for: {user.email}")
+    print(f"Registration OTP request for: {user.email}")
     
     # Check if email already exists
     if users.find_one({"email": user.email}):
-        print(f"❌ Email already registered: {user.email}")
+        print(f"Email already registered: {user.email}")
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    print(f"✅ Email available: {user.email}")
+    print(f"Email available: {user.email}")
     
     # Generate OTP
     otp = generate_otp()
-    print(f"🔢 Generated OTP: {otp}")
+    print(f"Generated OTP: {otp}")
     
     # Store user data temporarily with OTP
     pending_registrations[user.email] = {
@@ -159,31 +159,31 @@ def request_registration_otp(user: User):
         "otp": otp,
         "expires_at": datetime.utcnow() + timedelta(minutes=10)
     }
-    print(f"💾 Registration data stored for {user.email}")
+    print(f"Registration data stored for {user.email}")
     
     # Send OTP via email
-    print(f"📤 Attempting to send registration OTP email...")
+    print(f"Attempting to send registration OTP email...")
     if send_otp_email(user.email, otp, purpose="registration"):
-        print(f"✅ Registration OTP sent successfully")
+        print(f"Registration OTP sent successfully")
         # Print OTP to console for development
         print(f"\n{'='*50}")
-        print(f"📧 REGISTRATION OTP for {user.email}")
+        print(f"REGISTRATION OTP for {user.email}")
         print(f"{'='*50}")
         print(f"   OTP CODE: {otp}")
         print(f"   Expires: {pending_registrations[user.email]['expires_at']}")
         print(f"{'='*50}\n")
         return {"message": "OTP has been sent to your email"}
     else:
-        print(f"❌ Email sending failed")
+        print(f"Email sending failed")
         raise HTTPException(status_code=500, detail="Failed to send OTP")
 
 @router.post("/verify-registration-otp")
 def verify_registration_otp(email: str = Body(...), otp: str = Body(...)):
     """Verify OTP and create user account"""
-    print(f"🔐 Verifying registration OTP for: {email}")
+    print(f"Verifying registration OTP for: {email}")
     
     if email not in pending_registrations:
-        print(f"❌ No pending registration found for: {email}")
+        print(f"No pending registration found for: {email}")
         raise HTTPException(status_code=400, detail="No registration request found for this email")
     
     stored_data = pending_registrations[email]
@@ -191,15 +191,15 @@ def verify_registration_otp(email: str = Body(...), otp: str = Body(...)):
     # Check if OTP expired
     if datetime.utcnow() > stored_data["expires_at"]:
         del pending_registrations[email]
-        print(f"❌ OTP expired for: {email}")
+        print(f"OTP expired for: {email}")
         raise HTTPException(status_code=400, detail="OTP has expired. Please request a new one.")
     
     # Verify OTP
     if stored_data["otp"] != otp:
-        print(f"❌ Invalid OTP for: {email}")
+        print(f"Invalid OTP for: {email}")
         raise HTTPException(status_code=400, detail="Invalid OTP")
     
-    print(f"✅ OTP verified for: {email}")
+    print(f"OTP verified for: {email}")
     
     # Create user account
     user_data = stored_data["user_data"]
@@ -209,9 +209,9 @@ def verify_registration_otp(email: str = Body(...), otp: str = Body(...)):
     
     try:
         users.insert_one(new_user)
-        print(f"✅ User account created: {email}")
+        print(f"User account created: {email}")
     except Exception as e:
-        print(f"❌ Failed to create user: {e}")
+        print(f"Failed to create user: {e}")
         raise HTTPException(status_code=500, detail="Failed to create user account")
     
     # Clear pending registration
@@ -250,34 +250,34 @@ def login_user(request: LoginRequest):
 @router.post("/request-password-reset")
 def request_password_reset(email: str = Body(..., embed=True)):
     """Send OTP to user's email for password reset"""
-    print(f"🔐 Password reset request for: {email}")
+    print(f"Password reset request for: {email}")
     
     # Check if user exists
     user = users.find_one({"email": email})
     if not user:
-        print(f"❌ User not found: {email}")
+        print(f"User not found: {email}")
         raise HTTPException(status_code=404, detail="User not found")
     
-    print(f"✅ User found: {email}")
+    print(f"User found: {email}")
     
     # Generate OTP
     otp = generate_otp()
-    print(f"🔢 Generated OTP: {otp}")
+    print(f"Generated OTP: {otp}")
     
     # Store OTP with expiration (10 minutes)
     otp_store[email] = {
         "otp": otp,
         "expires_at": datetime.utcnow() + timedelta(minutes=10)
     }
-    print(f"💾 OTP stored for {email}")
+    print(f"OTP stored for {email}")
     
     # Send OTP via email
-    print(f"📤 Attempting to send OTP email...")
+    print(f"Attempting to send OTP email...")
     if send_otp_email(email, otp):
-        print(f"✅ Request completed successfully")
+        print(f"Request completed successfully")
         return {"message": "OTP has been sent to your email"}
     else:
-        print(f"❌ Email sending failed")
+        print(f"Email sending failed")
         raise HTTPException(status_code=500, detail="Failed to send OTP")
 
 @router.post("/verify-otp")

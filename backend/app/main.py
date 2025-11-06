@@ -26,20 +26,20 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Application lifespan manager"""
     # Startup
-    logger.info("🚀 Starting RAG Evaluator API...")
+    logger.info("Starting RAG Evaluator API...")
     
     # Connect to database (optional - some features may work without it)
     try:
         db_manager.connect()
-        logger.info("✅ Database connected successfully")
+        logger.info("Database connected successfully")
     except Exception as e:
-        logger.warning(f"⚠️ Database connection failed: {e}")
-        logger.info("📝 Continuing without database - some features may be limited")
+        logger.warning(f"Database connection failed: {e}")
+        logger.info("Continuing without database - some features may be limited")
     
     yield
     
     # Shutdown
-    logger.info("🛑 Shutting down RAG Evaluator API...")
+    logger.info("Shutting down RAG Evaluator API...")
     try:
         db_manager.disconnect()
     except Exception as e:

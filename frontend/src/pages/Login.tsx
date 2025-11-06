@@ -37,7 +37,6 @@ export default function Login() {
         localStorage.setItem("token", data.access_token);
       }
       setMessage(data.message ?? "Login Successful");
-      console.log("TEST TEST TESTT TEST")
       navigate('/home')
     } else {
       setMessage(data.detail ?? "Invalid Credentials");

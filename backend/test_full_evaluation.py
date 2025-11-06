@@ -13,7 +13,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 async def test_full_evaluation():
     """Test the complete RAG evaluation workflow"""
-    print("🔄 Testing complete RAG evaluation workflow...")
+    print("Testing complete RAG evaluation workflow...")
     
     from app.services.rag_evaluation_service import rag_evaluation_service
     
@@ -36,12 +36,12 @@ async def test_full_evaluation():
         llm_output=test_llm_output.strip()
     )
     
-    print(f"📊 Evaluation Result:")
+    print(f"Evaluation Result:")
     print(f"   Status: {result.get('status')}")
     
     if result.get('status') == 'success':
         metrics = result.get('aggregate_metrics', {})
-        print(f"   📈 Aggregate Metrics:")
+        print(f"   Aggregate Metrics:")
         print(f"      • Faithfulness Rate: {metrics.get('faithfulness_rate', 0):.1%}")
         print(f"      • Hallucination Rate: {metrics.get('hallucination_rate', 0):.1%}")
         print(f"      • Inferred Rate: {metrics.get('inferred_rate', 0):.1%}")
@@ -49,7 +49,7 @@ async def test_full_evaluation():
         print(f"      • Total Sentences: {metrics.get('total_sentences', 0)}")
         
         evaluations = result.get('sentence_evaluations', [])
-        print(f"   📝 Sentence Evaluations ({len(evaluations)} sentences):")
+        print(f"Sentence Evaluations ({len(evaluations)} sentences):")
         for eval_item in evaluations[:3]:  # Show first 3 for brevity
             print(f"      {eval_item['sentence_number']}. [{eval_item['classification'].upper()}] \"{eval_item['sentence_text'][:50]}...\"")
     else:
@@ -59,7 +59,7 @@ async def test_full_evaluation():
 
 async def main():
     """Main test function"""
-    print("🧪 RAG Evaluation API - Full Integration Test")
+    print("RAG Evaluation API - Full Integration Test")
     print("=" * 55)
     
     try:
@@ -69,14 +69,14 @@ async def main():
         print(f"\n📊 Full Integration Test: {'✅ PASS' if success else '❌ FAIL'}")
         
         if success:
-            print(f"\n🎉 RAG Evaluation system is working correctly!")
-            print(f"💡 The system is currently using mock responses.")
-            print(f"   To use real AI evaluation, add your Gemini API key to .env")
+            print(f"\nRAG Evaluation system is working correctly!")
+            print(f"The system is currently using mock responses.")
+            print(f"To use real AI evaluation, add your Gemini API key to .env")
         
         return success
             
     except Exception as e:
-        print(f"\n💥 Error during testing: {e}")
+        print(f"\nError during testing: {e}")
         import traceback
         traceback.print_exc()
         return False

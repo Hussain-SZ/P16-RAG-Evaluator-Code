@@ -13,7 +13,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 def test_sentence_splitting():
     """Test the sentence splitting functionality"""
-    print("🔍 Testing sentence splitting functionality...")
+    print("Testing sentence splitting functionality...")
     
     from app.services.rag_evaluation_service import RAGEvaluationService
     
@@ -28,8 +28,8 @@ def test_sentence_splitting():
     
     sentences = service.split_into_sentences(test_text.strip())
     
-    print(f"📝 Original text: {test_text.strip()}")
-    print(f"📋 Split into {len(sentences)} sentences:")
+    print(f"Original text: {test_text.strip()}")
+    print(f"Split into {len(sentences)} sentences:")
     for i, sentence in enumerate(sentences, 1):
         print(f"   {i}. {sentence}")
     
@@ -37,7 +37,7 @@ def test_sentence_splitting():
 
 def test_prompt_building():
     """Test the prompt building functionality"""
-    print("\n🏗️  Testing prompt building functionality...")
+    print("\nTesting prompt building functionality...")
     
     from app.services.rag_evaluation_service import RAGEvaluationService
     
@@ -53,15 +53,15 @@ def test_prompt_building():
     
     prompt = service.build_batch_judge_prompt(test_query, test_context, test_sentences)
     
-    print(f"✅ Prompt generated successfully!")
-    print(f"📏 Prompt length: {len(prompt)} characters")
-    print(f"📝 Sample (first 200 chars): {prompt[:200]}...")
+    print(f"Prompt generated successfully!")
+    print(f"Prompt length: {len(prompt)} characters")
+    print(f"Sample (first 200 chars): {prompt[:200]}...")
     
     return len(prompt) > 0
 
 def test_pydantic_models():
     """Test the Pydantic models"""
-    print("\n🏷️  Testing Pydantic models...")
+    print("\nTesting Pydantic models...")
     
     from app.schemas.rag_evaluation import RAGEvaluationRequest, RAGEvaluationResponse
     
@@ -72,10 +72,10 @@ def test_pydantic_models():
         llm_output="The fox jumped over the dog and ran away."
     )
     
-    print(f"✅ RAGEvaluationRequest created successfully!")
-    print(f"📋 Query: {test_request.query}")
-    print(f"📋 Context length: {len(test_request.context)} chars")
-    print(f"📋 Output length: {len(test_request.llm_output)} chars")
+    print(f"RAGEvaluationRequest created successfully!")
+    print(f"Query: {test_request.query}")
+    print(f"Context length: {len(test_request.context)} chars")
+    print(f"Output length: {len(test_request.llm_output)} chars")
     
     # Test response model (success case)
     test_response_data = {
@@ -103,14 +103,14 @@ def test_pydantic_models():
     }
     
     test_response = RAGEvaluationResponse(**test_response_data)
-    print(f"✅ RAGEvaluationResponse created successfully!")
-    print(f"📊 Status: {test_response.status}")
+    print(f"RAGEvaluationResponse created successfully!")
+    print(f"Status: {test_response.status}")
     
     return True
 
 def main():
     """Main test function"""
-    print("🧪 RAG Evaluation API - Component Testing")
+    print("RAG Evaluation API - Component Testing")
     print("=" * 50)
     
     try:
@@ -118,21 +118,21 @@ def main():
         test1 = test_sentence_splitting()
         test2 = test_prompt_building()  
         test3 = test_pydantic_models()
-        
-        print(f"\n📊 Test Results Summary:")
+
+        print(f"\nTest Results Summary:")
         print(f"   • Sentence Splitting: {'✅ PASS' if test1 else '❌ FAIL'}")
         print(f"   • Prompt Building: {'✅ PASS' if test2 else '❌ FAIL'}")
         print(f"   • Pydantic Models: {'✅ PASS' if test3 else '❌ FAIL'}")
         
         if all([test1, test2, test3]):
-            print(f"\n🎉 All tests passed! The RAG evaluation system is ready.")
-            print(f"\n📝 Next steps:")
+            print(f"\nAll tests passed! The RAG evaluation system is ready.")
+            print(f"\nNext steps:")
             print(f"   1. Add your Gemini API key to the .env file")
             print(f"   2. Start the FastAPI server: uvicorn app.main:app --reload")
             print(f"   3. Test the API endpoint: POST /api/v1/rag/evaluate")
             return True
         else:
-            print(f"\n❌ Some tests failed. Please check the implementation.")
+            print(f"\nSome tests failed. Please check the implementation.")
             return False
             
     except Exception as e:

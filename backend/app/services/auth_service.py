@@ -28,7 +28,7 @@ class AuthService:
     def send_otp_email(self, email: str, otp: str, purpose: str = "verification") -> bool:
         """Send OTP via email using SendGrid"""
         if not settings.sendgrid_api_key:
-            print("❌ SENDGRID_API_KEY not set in environment variables")
+            print("SENDGRID_API_KEY not set in environment variables")
             return False
         
         try:
@@ -56,7 +56,7 @@ class AuthService:
             response = requests.post(url, json=data, headers=headers)
             return response.status_code == 202
         except Exception as e:
-            print(f"❌ Failed to send email: {e}")
+            print(f"Failed to send email: {e}")
             return False
     
     def register_user(self, user_data: UserSignupRequest) -> Dict[str, str]:

@@ -32,12 +32,12 @@ class DatabaseManager:
             self.users_collection = self.db["users"]
             
             self._connected = True
-            logger.info("✅ Successfully connected to MongoDB!")
+            logger.info("Successfully connected to MongoDB!")
             logger.info(f"   Database: {self.db.name}")
             logger.info(f"   Collections: {self.db.list_collection_names()}")
             
         except Exception as e:
-            logger.error(f"❌ MongoDB connection failed: {e}")
+            logger.error(f"MongoDB connection failed: {e}")
             self._connected = False
             # In development, you might want to continue without DB
             # In production, you should raise the exception
@@ -48,7 +48,7 @@ class DatabaseManager:
         if self.client:
             self.client.close()
             self._connected = False
-            logger.info("📦 Disconnected from MongoDB")
+            logger.info("Disconnected from MongoDB")
     
     def is_connected(self) -> bool:
         """Check if database is connected"""

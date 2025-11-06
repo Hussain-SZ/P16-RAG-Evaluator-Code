@@ -87,7 +87,7 @@ export default function Home() {
         setFileName(file.name);
         setFileContent(text);
         context = text; // Override textarea context with file content
-        setUploadMessage(`📄 Using uploaded file "${file.name}" as context`);
+        setUploadMessage(`Using uploaded file "${file.name}" as context`);
       } else {
         // No file uploaded - use textarea context
         setFileName(null);
@@ -97,7 +97,7 @@ export default function Home() {
           setIsLoading(false);
           return;
         }
-        setUploadMessage("📝 Using manually entered context");
+        setUploadMessage("Using manually entered context");
       }
 
       // Validate required fields
@@ -137,14 +137,14 @@ export default function Home() {
       
       // Update success message based on context source
       if (file && file.size > 0) {
-        setUploadMessage(`✅ RAG evaluation completed! Used uploaded file "${file.name}" as context.`);
+        setUploadMessage(`RAG evaluation completed! Used uploaded file "${file.name}" as context.`);
       } else {
-        setUploadMessage("✅ RAG evaluation completed! Used manually entered context.");
+        setUploadMessage("RAG evaluation completed! Used manually entered context.");
       }
 
     } catch (err) {
       console.error("Error during RAG evaluation:", err);
-      setUploadMessage(`❌ Error: ${err instanceof Error ? err.message : 'Unknown error occurred'}`);
+      setUploadMessage(`Error: ${err instanceof Error ? err.message : 'Unknown error occurred'}`);
       setEvaluationResult(null);
     } finally {
       setIsLoading(false);
@@ -216,11 +216,11 @@ export default function Home() {
       }
 
       const result = await response.json();
-      alert(`✅ Report saved successfully! ID: ${result.report_id}`);
+      alert(`Report saved successfully! ID: ${result.report_id}`);
 
     } catch (err) {
       console.error("Error saving report:", err);
-      alert(`❌ Failed to save report: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      alert(`Failed to save report: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setIsSaving(false);
     }
@@ -290,11 +290,11 @@ export default function Home() {
 
           {/* --- Status message --- */}
           {uploadMessage && (
-            <div className={`upload-message ${uploadMessage.includes('❌') ? 'error' : 'success'}`} role="status">
+            <div className={`upload-message ${uploadMessage.includes('Error') ? 'error' : 'success'}`} role="status">
               <p>{uploadMessage}</p>
               {fileContent && (
                 <details className="file-preview">
-                  <summary>📄 View {fileName}</summary>
+                  <summary>View {fileName}</summary>
                   <pre>{fileContent}</pre>
                 </details>
               )}
@@ -305,13 +305,13 @@ export default function Home() {
           {evaluationResult && evaluationResult.status === "success" && (
             <div className="evaluation-results">
               <div className="results-header">
-                <h3>📊 Evaluation Results</h3>
+                <h3>Evaluation Results</h3>
                 <button 
                   onClick={handleSaveReport} 
                   className="save-report-button"
                   disabled={isSaving}
                 >
-                  {isSaving ? "Saving..." : "💾 Save Report"}
+                  {isSaving ? "Saving..." : "Save Report"}
                 </button>
               </div>
               
@@ -362,7 +362,7 @@ export default function Home() {
 
               {/* Detailed Results */}
               <details className="detailed-results">
-                <summary>📋 Detailed Sentence Analysis ({evaluationResult.sentence_evaluations?.length} sentences)</summary>
+                <summary>Detailed Sentence Analysis ({evaluationResult.sentence_evaluations?.length} sentences)</summary>
                 {evaluationResult.sentence_evaluations && (
                   <div className="sentence-evaluations">
                     {evaluationResult.sentence_evaluations.map((evaluation, index) => (
@@ -390,7 +390,7 @@ export default function Home() {
 
               {/* Raw JSON for debugging (collapsible) */}
               <details className="raw-json">
-                <summary>🔧 Raw JSON Response</summary>
+                <summary>Raw JSON Response</summary>
                 <pre>{JSON.stringify(evaluationResult, null, 2)}</pre>
               </details>
             </div>
@@ -398,7 +398,7 @@ export default function Home() {
         </section>
 
         <footer>
-          <p>©️ {new Date().getFullYear()} RAG Pipeline Evaluator</p>
+          <p>&copy; {new Date().getFullYear()} RAG Pipeline Evaluator</p>
         </footer>
       </div>
 
@@ -407,7 +407,7 @@ export default function Home() {
         <div className="modal-overlay" onClick={() => setShowSaveModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>💾 Save Evaluation Report</h2>
+              <h2>Save Evaluation Report</h2>
               <button 
                 className="modal-close" 
                 onClick={() => setShowSaveModal(false)}

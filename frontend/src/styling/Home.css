@@ -258,7 +258,7 @@ body, html {
   word-wrap: break-word;
   border: 1px solid #eee;
   color: #333;
-  text-align: left; /* ✅ Add this line */
+  text-align: left;
 }
 
 

@@ -143,7 +143,7 @@ export default function MyReports() {
         {/* Error message */}
         {error && (
           <div className="error-message">
-            ❌ {error}
+            {error}
           </div>
         )}
 
@@ -189,7 +189,7 @@ export default function MyReports() {
                     ✗ {(report.hallucination_rate * 100).toFixed(0)}%
                   </div>
                   <div className="metric-badge">
-                    📝 {report.total_sentences} sentences
+                    {report.total_sentences} sentences
                   </div>
                 </div>
 
@@ -220,7 +220,7 @@ export default function MyReports() {
                     onClick={() => deleteReport(selectedReport.report_id)}
                     className="delete-button"
                   >
-                    🗑️ Delete
+                    Delete
                   </button>
                 </div>
 
@@ -243,7 +243,7 @@ export default function MyReports() {
 
                 {/* Original Inputs */}
                 <details className="report-section">
-                  <summary>📝 Original Inputs</summary>
+                  <summary>Original Inputs</summary>
                   <div className="input-display">
                     <div>
                       <strong>Query:</strong>
@@ -262,7 +262,7 @@ export default function MyReports() {
 
                 {/* Aggregate Metrics */}
                 <div className="report-section">
-                  <h3>📊 Summary Metrics</h3>
+                  <h3>Summary Metrics</h3>
                   <div className="metrics-grid">
                     <div className="metric">
                       <span className="metric-label">Faithfulness Rate:</span>
@@ -290,7 +290,7 @@ export default function MyReports() {
                     </div>
                   </div>
 
-                  <h3 style={{ marginTop: '24px' }}>🎯 Performance Metrics</h3>
+                  <h3 style={{ marginTop: '24px' }}>Performance Metrics</h3>
                   <div className="metrics-grid">
                     <div className="metric">
                       <span className="metric-label">Precision:</span>
@@ -321,7 +321,7 @@ export default function MyReports() {
 
                 {/* Sentence Evaluations */}
                 <details className="report-section" open>
-                  <summary>📋 Detailed Sentence Analysis ({selectedReport.sentence_evaluations.length} sentences)</summary>
+                  <summary>Detailed Sentence Analysis ({selectedReport.sentence_evaluations.length} sentences)</summary>
                   <div className="sentence-evaluations">
                     {selectedReport.sentence_evaluations.map((evaluation, index) => (
                       <div key={index} className={`sentence-evaluation ${evaluation.classification}`}>
